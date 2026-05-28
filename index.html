@@ -3,51 +3,61 @@ h2 button { font-size: 1em; border-radius: 4px; }
 </style>
 <h1>hello from madison via helsinki</h1>
 <p>inference at the speed of a screaming 2 core 2.0ghz cost optimized hetzner box:</p>
-<h2>hello <button onclick="generate('george')">george</button></h2>
-<h2>hello <button onclick="generate('david')">david</button></h2>
-<h2>hello <button onclick="generate('julia')">julia</button></h2>
+  <h2>hello <button onclick="generate('george')">george</button></h2>
+  <h2>hello <button onclick="generate('david')">david</button></h2>
+  <h2>hello <button onclick="generate('julia')">julia</button></h2>
 
-<div id="output"></div>
+  <div id="output"></div>
+  
+  <p style="margin-top:1.5em; font-size:0.9em;">
+    <a href="/ulam.html">the ulam spiral →</a>
+  </p>
 
-<script>
-async function generate(name) {
-  const div = document.getElementById('output');
-  div.textContent = 'generating...';
+  <p style="margin-top:1em; font-size:0.9em;"><a href="/love-etymology.html">an
+   etymological history of love →</a></p>
 
-  if (window._gen) window._gen.abort();
-  window._gen = new AbortController();
+  <script>
+  async function generate(name) {
+    const div = document.getElementById('output');
+    div.textContent = 'generating...';
 
-  try {
-    const response = await fetch('/ollama/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: window._gen.signal,
-      body: JSON.stringify({
-        model: 'llama3.2:1b',
-        prompt: `Write one short paragraph (3-4 sentences) about a person named ${name}.`,
-        stream: true,
-        options: { num_predict: 120, num_ctx: 512 }
-      })
-    });
+    if (window._gen) window._gen.abort();
+    window._gen = new AbortController();
 
-    div.textContent = '';
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buf = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += decoder.decode(value, { stream: true });
-      const lines = buf.split('\n');
-      buf = lines.pop();
-      for (const line of lines) {
-        if (!line) continue;
-        const chunk = JSON.parse(line);
-        if (chunk.response) div.textContent += chunk.response;
+    try {
+      const response = await fetch('/ollama/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: window._gen.signal,
+        body: JSON.stringify({
+          model: 'llama3.2:1b',
+          prompt: `Write one short paragraph (3-4 sentences) about a person 
+  named ${name}.`,
+          stream: true,
+          options: { num_predict: 120, num_ctx: 512 }
+        })
+      });
+
+      div.textContent = '';
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
+        for (const line of lines) {
+          if (!line) continue;
+          const chunk = JSON.parse(line);
+          if (chunk.response) div.textContent += chunk.response;
+        }
       }
+    } catch (e) {
+      if (e.name !== 'AbortError') div.textContent = 'fetch error: ' +
+  e.message;
     }
-  } catch (e) {
-    if (e.name !== 'AbortError') div.textContent = 'fetch error: ' + e.message;
   }
-}
-</script>
+  </script>
+
