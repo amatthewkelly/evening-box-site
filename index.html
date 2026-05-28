@@ -7,6 +7,12 @@ h2 button { font-size: 1em; border-radius: 4px; }
   <h2>hello <button onclick="generate('david')">david</button></h2>
   <h2>hello <button onclick="generate('julia')">julia</button></h2>
 
+  <p style="margin-top:0.5em; font-size:0.9em;">
+    <label><input type="radio" name="model" value="llama3.2:1b" checked> llama3.2:1b</label>
+    &nbsp;
+    <label><input type="radio" name="model" value="gemma2:2b">gemma2:2b</label></p>
+      
+    
   <div id="output"></div>
   
   <p style="margin-top:1.5em; font-size:0.9em;">
@@ -30,7 +36,7 @@ h2 button { font-size: 1em; border-radius: 4px; }
         headers: { 'Content-Type': 'application/json' },
         signal: window._gen.signal,
         body: JSON.stringify({
-          model: 'llama3.2:1b',
+          model: document.querySelector('input[name="model"]:checked').value,
           prompt: `Write one short paragraph (3-4 sentences) about a person 
   named ${name}.`,
           stream: true,
